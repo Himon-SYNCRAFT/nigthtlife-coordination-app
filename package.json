@@ -9,7 +9,8 @@
   "author": "Daniel Zawlocki",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.14.0"
+    "express": "^4.14.0",
+    "mongodb": "^2.2.14"
   },
   "devDependencies": {},
   "repository": {
