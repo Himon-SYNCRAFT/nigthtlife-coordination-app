@@ -10,6 +10,7 @@
   "author": "Daniel Zawlocki",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.15.3",
     "express": "^4.14.0",
     "mongodb": "^2.2.14",
     "react": "^15.4.1",
