@@ -33,6 +33,7 @@ var Main = function (_React$Component) {
         _this.state = { search: '' };
 
         _this._onSearchChange = _this._onSearchChange.bind(_this);
+        _this._onSubmit = _this._onSubmit.bind(_this);
         return _this;
     }
 
@@ -63,7 +64,7 @@ var Main = function (_React$Component) {
                 ),
                 React.createElement(
                     'form',
-                    null,
+                    { onSubmit: this._onSubmit },
                     React.createElement(
                         'div',
                         { className: 'form-group' },
@@ -75,7 +76,7 @@ var Main = function (_React$Component) {
                         React.createElement(
                             'button',
                             { className: 'btn btn-default' },
-                            'GO'
+                            'Go'
                         )
                     )
                 )
