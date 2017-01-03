@@ -1,6 +1,14 @@
 const axios = require('axios')
-const yelp = axios.create({
-    baseURL: '',
+
+const instance = axios.create({
+    baseURL: 'http://localhost:3000/api/',
     timeout: 10000
 })
 
+module.exports = {
+    businesses: {
+        getByLocation: (location) => {
+            return instance.get('/search/' + location)
+        }
+    }
+}

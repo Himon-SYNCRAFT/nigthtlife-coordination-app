@@ -14,10 +14,10 @@ module.exports = {
         return axios.get('https://api.yelp.com/v3/businesses/search', {
             params: {
                 location,
-                categories: 'bars,restaurants',
+                categories: 'bars,pubs,nightlife',
                 sort_by: 'rating',
                 radius: 20000,
-                open_now: true
+                limit: 50,
             },
 
             headers: {
