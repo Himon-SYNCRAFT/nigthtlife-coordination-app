@@ -16,6 +16,7 @@ module.exports = (app, db) => {
 
     const tokensCollection = db.collection('tokens')
     const usersCollection = db.collection('users')
+    const businessesCollection = db.collection('businesses')
 
     passport.use(new TwitterStrategy(
         {
@@ -76,6 +77,54 @@ module.exports = (app, db) => {
         successRedirect: '/',
         failureRedirect: '/loginFailed'
     }))
+
+    app.get('/api/businesses/:id/toggleAssignment', (req, res) => {
+        if (!req.user) {
+            res.sendStatus(401)
+        } else {
+            const businessId = req.params.id
+            const userId = req.user._id.toString()
+            const now = (new Date()).toISOString().slice(0,10).replace(/-/g,"")
+
+            businessesCollection.findOne({ businessId }, (err, doc) => {
+                if (err) {
+                    throw err
+                } else if (!doc) {
+                    let businessToAdd = {
+                        businessId,
+                        users: {}
+                    }
+
+                    businessToAdd.users[now] = [userId]
+
+                    businessesCollection.insertOne(businessToAdd, (err, doc) => {
+                        if (err) {
+                            throw err
+                        } else {
+                            res.send(doc)
+                        }
+                    })
+                } else {
+                    if (!doc.users[now]) {
+                        doc.users[now] = [userId]
+                    } else {
+                        if (doc.users[now]) {
+                            const indexOfUserId = doc.users[now].indexOf(userId)
+
+                            if (indexOfUserId == -1) {
+                                doc.users[now].push(userId)
+                            } else {
+                                doc.users[now].splice(indexOfUserId, 1)
+                            }
+                        }
+                    }
+
+                    businessesCollection.save(doc)
+                    res.send(doc)
+                }
+            })
+        }
+    })
 
     app.route('/api/search/:location/')
         .get((req, res) => {
