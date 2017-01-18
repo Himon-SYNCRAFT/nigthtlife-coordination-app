@@ -9,6 +9,10 @@ module.exports = {
     businesses: {
         getByLocation: (location) => {
             return instance.get('/search/' + location)
+        },
+
+        toggleAssignment: (businessId) => {
+            return instance.get('/businesses/' + businessId + '/toggleAssignment')
         }
     }
 }

@@ -1,5 +1,6 @@
 const AppDispatcher = require('../dispatcher/AppDispatcher')
 const BusinessesConstants = require('../constants/BusinessesConstants')
+const ErrorsConstants = require('../constants/ErrorsConstants')
 const Api = require('../Api')
 
 const BusinessesActions = {
@@ -12,6 +13,27 @@ const BusinessesActions = {
                 })
             })
     },
+
+    toggleAssignment: (businessId) => {
+        Api.businesses.toggleAssignment(businessId)
+            .then(response => {
+                AppDispatcher.dispatch({
+                    actionType: BusinessesConstants.TOGGLE_ASSIGNMENT,
+                    data: response
+                })
+            })
+            .catch(error => {
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 401:
+                            AppDispatcher.dispatch({
+                                actionType: ErrorsConstants.UNAUTHORIZED_ERROR,
+                            })
+                            break
+                    }
+                }
+            })
+    }
 }
 
 module.exports = BusinessesActions

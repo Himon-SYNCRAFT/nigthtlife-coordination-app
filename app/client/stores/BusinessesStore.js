@@ -27,6 +27,10 @@ AppDispatcher.register(action => {
             businesses = action.data.data.businesses
             BusinessesStore.emit(CHANGE)
             break
+
+        case BusinessesConstants.BUSINESS_TOGGLE_ASSIGNMENT:
+            BusinessesStore.emit(CHANGE)
+            break
     }
 })
 
