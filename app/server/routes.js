@@ -9,6 +9,9 @@ const TWITTER_CONSUMER_SECRET = '0trz1qTQw1mD0gQpfkaBAJPSLvc16s8dEDStGvutcDsTWoB
 const TWITTER_CALLBACK_URL = 'http://localhost:3000/twitter/callback'
 
 const tokenName = 'nightlife'
+let now = () => {
+    return (new Date()).toISOString().slice(0,10).replace(/-/g,"")
+}
 
 let Twitter
 
@@ -84,7 +87,6 @@ module.exports = (app, db) => {
         } else {
             const businessId = req.params.id
             const userId = req.user._id.toString()
-            const now = (new Date()).toISOString().slice(0,10).replace(/-/g,"")
 
             businessesCollection.findOne({ businessId }, (err, doc) => {
                 if (err) {
@@ -95,26 +97,32 @@ module.exports = (app, db) => {
                         users: {}
                     }
 
-                    businessToAdd.users[now] = [userId]
+                    businessToAdd.users[now()] = [userId]
 
                     businessesCollection.insertOne(businessToAdd, (err, doc) => {
                         if (err) {
                             throw err
                         } else {
+                            doc.going = true
+                            doc.users_count = 1
                             res.send(doc)
                         }
                     })
                 } else {
-                    if (!doc.users[now]) {
-                        doc.users[now] = [userId]
+                    if (!doc.users[now()]) {
+                        doc.users[now()] = [userId]
                     } else {
-                        if (doc.users[now]) {
-                            const indexOfUserId = doc.users[now].indexOf(userId)
+                        if (doc.users[now()]) {
+                            const indexOfUserId = doc.users[now()].indexOf(userId)
 
                             if (indexOfUserId == -1) {
-                                doc.users[now].push(userId)
+                                doc.users[now()].push(userId)
+                                doc.going = true
+                                doc.users_count = doc.users[now()].length
                             } else {
-                                doc.users[now].splice(indexOfUserId, 1)
+                                doc.users[now()].splice(indexOfUserId, 1)
+                                doc.going = false
+                                doc.users_count = doc.users[now()].length
                             }
                         }
                     }
@@ -159,7 +167,37 @@ module.exports = (app, db) => {
                     const token = doc.data.access_token
                     yelp.search(token, location)
                         .then(response => {
-                            res.json(response.data)
+                            const businessesId = response.data.businesses.map(item => {
+                                return item.id
+                            })
+
+                            let docs = businessesCollection.find({ businessId: { $in: businessesId } }).toArray()
+
+                            docs.then((docs) => {
+                                let businesses = response.data.businesses.map(business => {
+                                    business.users_count = 0
+                                    business.going = false
+
+                                    if (req.user) {
+                                        const userId = req.user._id.toString()
+
+                                        for (let i = 0; i < docs.length; i++) {
+                                            let doc = docs[i]
+
+                                            if (doc.businessId == business.id && doc.users && doc.users[now()]) {
+                                                business.users_count = doc.users[now()].length
+                                                business.going = doc.users[now()].indexOf(userId) != -1
+                                            }
+                                        }
+                                    }
+
+                                    return business
+                                })
+
+                                response.data.businesses = businesses
+                                res.json(response.data)
+                            })
+
                         })
                         .catch(error => {
                             console.log(error)

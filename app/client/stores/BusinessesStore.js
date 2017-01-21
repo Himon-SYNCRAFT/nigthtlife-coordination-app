@@ -28,7 +28,15 @@ AppDispatcher.register(action => {
             BusinessesStore.emit(CHANGE)
             break
 
-        case BusinessesConstants.BUSINESS_TOGGLE_ASSIGNMENT:
+        case BusinessesConstants.TOGGLE_ASSIGNMENT:
+            const data = action.data.data
+            for (let i = 0, len = businesses.length; i < len; i++) {
+                if (businesses[i].id == data.businessId) {
+                    businesses[i].users_count = data.users_count
+                    businesses[i].going = data.going
+                }
+            }
+
             BusinessesStore.emit(CHANGE)
             break
     }

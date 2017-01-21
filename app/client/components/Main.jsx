@@ -22,6 +22,12 @@ class Main extends React.Component {
     componentDidMount() {
         BusinessesStore.addChangeListener(this._onBusinessesChange)
         ErrorsStore.addUnauthorizedListener(this._onUnauthorizedError)
+        const search = localStorage.getItem('search')
+
+        if (search) {
+            this.setState({ search })
+            BusinessesActions.get(search)
+        }
     }
 
     componentWillUnmount() {
@@ -32,7 +38,6 @@ class Main extends React.Component {
     _onBusinessesChange() {
         const businesses = BusinessesStore.get()
         this.setState({ businesses })
-        console.log(businesses);
     }
 
     _onUnauthorizedError() {
@@ -46,6 +51,7 @@ class Main extends React.Component {
     _onSubmit(event) {
         event.preventDefault()
         BusinessesActions.get(this.state.search)
+        localStorage.setItem('search', this.state.search)
     }
 
     _onGoing(businessId) {
@@ -68,6 +74,7 @@ class Main extends React.Component {
                         <th>Phone</th>
                         <th>Rating</th>
                         <th>Review count</th>
+                        <th>Users Count</th>
                         <th>GO</th>
                     </tr>
                 </thead>
@@ -113,6 +120,7 @@ class BusinessListItem extends React.Component {
                 <td>{ this.props.data.display_phone }</td>
                 <td>{ this.props.data.rating }</td>
                 <td>{ this.props.data.review_count }</td>
+                <td>{ this.props.data.users_count }</td>
                 <td><button onClick={ this.props.onGoing } className="btn btn-default">Going</button></td>
             </tr>
         )

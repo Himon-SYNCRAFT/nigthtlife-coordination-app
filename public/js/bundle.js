@@ -112,6 +112,12 @@ var Main = function (_React$Component) {
         value: function componentDidMount() {
             BusinessesStore.addChangeListener(this._onBusinessesChange);
             ErrorsStore.addUnauthorizedListener(this._onUnauthorizedError);
+            var search = localStorage.getItem('search');
+
+            if (search) {
+                this.setState({ search: search });
+                BusinessesActions.get(search);
+            }
         }
     }, {
         key: 'componentWillUnmount',
@@ -124,7 +130,6 @@ var Main = function (_React$Component) {
         value: function _onBusinessesChange() {
             var businesses = BusinessesStore.get();
             this.setState({ businesses: businesses });
-            console.log(businesses);
         }
     }, {
         key: '_onUnauthorizedError',
@@ -141,6 +146,7 @@ var Main = function (_React$Component) {
         value: function _onSubmit(event) {
             event.preventDefault();
             BusinessesActions.get(this.state.search);
+            localStorage.setItem('search', this.state.search);
         }
     }, {
         key: '_onGoing',
@@ -196,6 +202,11 @@ var Main = function (_React$Component) {
                             'th',
                             null,
                             'Review count'
+                        ),
+                        React.createElement(
+                            'th',
+                            null,
+                            'Users Count'
                         ),
                         React.createElement(
                             'th',
@@ -298,6 +309,11 @@ var BusinessListItem = function (_React$Component2) {
                 React.createElement(
                     'td',
                     null,
+                    this.props.data.users_count
+                ),
+                React.createElement(
+                    'td',
+                    null,
                     React.createElement(
                         'button',
                         { onClick: this.props.onGoing, className: 'btn btn-default' },
@@ -368,7 +384,15 @@ AppDispatcher.register(function (action) {
             BusinessesStore.emit(CHANGE);
             break;
 
-        case BusinessesConstants.BUSINESS_TOGGLE_ASSIGNMENT:
+        case BusinessesConstants.TOGGLE_ASSIGNMENT:
+            var data = action.data.data;
+            for (var i = 0, len = businesses.length; i < len; i++) {
+                if (businesses[i].id == data.businessId) {
+                    businesses[i].users_count = data.users_count;
+                    businesses[i].going = data.going;
+                }
+            }
+
             BusinessesStore.emit(CHANGE);
             break;
     }
